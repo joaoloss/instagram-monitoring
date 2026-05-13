@@ -1,3 +1,6 @@
+# User specified
+.vscode/
+
 # Compiled class file
 *.class
 target/

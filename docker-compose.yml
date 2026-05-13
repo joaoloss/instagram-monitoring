@@ -94,3 +94,16 @@ services:
       - controller-1
       - controller-2
       - controller-3
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app
+    env_file:
+      - .env
+    depends_on:
+      - broker-1
+      - broker-2
+      - broker-3
+    restart: on-failure
