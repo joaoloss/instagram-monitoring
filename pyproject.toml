@@ -1,0 +1,20 @@
+[project]
+name = "instagram-monitoring"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "FelipePassarela", email = "126916744+FelipePassarela@users.noreply.github.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "kafka-python>=2.3.1",
+]
+
+[project.scripts]
+producer = "instagram_monitoring.producer.main:main"
+consumer = "instagram_monitoring.consumer.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

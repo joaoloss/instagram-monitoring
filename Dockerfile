@@ -1,21 +1,19 @@
-# Stage 1: Build
-FROM maven:3.9-eclipse-temurin-17 AS builder
-
-WORKDIR /build
-
-# Copy the pom.xml file first to cache the dependencies
-COPY app/pom.xml .
-RUN mvn dependency:go-offline -q
-
-COPY app/src ./src
-RUN mvn clean package -DskipTests -q
-
-FROM eclipse-temurin:17-jre-alpine
+FROM python:3.14-slim
 
 WORKDIR /app
 
-COPY --from=builder /build/target/app-1.0-SNAPSHOT.jar app.jar
+RUN pip install uv
+
+COPY pyproject.toml uv.lock* README.md ./
+COPY src ./src
+
+RUN uv sync --frozen
 
 COPY .env* ./
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# To see logs in real-time
+ENV PYTHONUNBUFFERED=1
+
+# Default to producer, but can be overridden
+ENTRYPOINT ["uv", "run"]
+CMD ["producer"]
