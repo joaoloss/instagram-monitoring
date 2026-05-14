@@ -1,29 +1,36 @@
-import json
-
-from kafka import KafkaConsumer
-
-from instagram_monitoring import PostPublishedEvent, config
+from instagram_monitoring import PostPublishedEvent, StatsSnapshot, config
+from instagram_monitoring.consumer.infra.post_consumer import PostConsumer
+from instagram_monitoring.consumer.presentation import stats_widget, terminal_display
 
 
 def main():
     print("Consumer is running...")
 
-    consumer = KafkaConsumer(
+    consumer = PostConsumer(
         config.TOPIC,
         bootstrap_servers=config.BOOTSTRAP_SERVERS,
-        auto_offset_reset="earliest",
         group_id="test-group",
-        value_deserializer=lambda v: json.loads(v.decode("utf-8")),
     )
 
     try:
-        for message in consumer:
-            event = PostPublishedEvent(**message.value)
-            print(f"Received event: {event}")
+        consume_messages(consumer)
     except KeyboardInterrupt:
         print("Consumer interrupted. Exiting...")
     finally:
         consumer.close()
+
+
+def consume_messages(consumer):
+    for msg in consumer:
+        event = PostPublishedEvent(**msg.value)
+        stats = StatsSnapshot(
+            mean_views=event.n_views,
+            std_views=0.0,
+            total_views=event.n_views,
+        )
+
+        stats_renderable = stats_widget.render([stats])
+        terminal_display.display(stats_renderable)
 
 
 if __name__ == "__main__":
