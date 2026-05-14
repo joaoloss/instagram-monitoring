@@ -95,11 +95,11 @@ services:
       - controller-2
       - controller-3
 
-  app:
+  producer:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: app
+    container_name: producer
     env_file:
       - .env
     depends_on:
@@ -107,3 +107,18 @@ services:
       - broker-2
       - broker-3
     restart: on-failure
+    command: uv run producer
+
+  consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: consumer
+    env_file:
+      - .env
+    depends_on:
+      - broker-1
+      - broker-2
+      - broker-3
+    restart: on-failure
+    command: uv run consumer
