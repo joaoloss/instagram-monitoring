@@ -8,7 +8,7 @@ O tópico pode se chamar "post-stats" e conter mensagens no seguinte formato:
 
 ```json
 {
-  "post_id": "123",
+  "id": "123",
   "views": 1200,
   "likes": 180,
   "comments": 42

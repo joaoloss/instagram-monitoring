@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class PostPublishedEvent:
-    post_id: str
+    id: str
     n_views: int
     n_likes: int
     n_comments: int

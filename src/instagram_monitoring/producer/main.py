@@ -16,7 +16,7 @@ def main():
 
     for _ in range(10):
         event = PostPublishedEvent(
-            post_id="1234567890", n_views=100, n_likes=50, n_comments=10
+            id="1234567890", n_views=100, n_likes=50, n_comments=10
         )
         producer.send(config.TOPIC, value=event.__dict__)
         print(f"Sent event: {event}")
