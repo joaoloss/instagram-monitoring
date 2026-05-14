@@ -35,6 +35,7 @@ Tem que ser 3 situações de interesse que consomem o evento primitivo.
 - N ajustável
 - Média
 - Desvio padrão
+- Exibir gráfico de evolução das estatísticas?
 - Exibir distribuição?
 
 ### Post viral detectado
