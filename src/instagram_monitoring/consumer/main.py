@@ -19,7 +19,7 @@ def main():
     try:
         consume_messages(consumer)
     except KeyboardInterrupt:
-        print("Consumer interrupted. Exiting...")
+        print("\nConsumer interrupted. Exiting...")
     finally:
         consumer.close()
 
@@ -28,20 +28,31 @@ def consume_messages(consumer):
     stats_aggr = RollingStatsAggregator(window_len=config.STATS_WINDOW_LEN)
 
     for msg in consumer:
-        event = PostPublishedEvent(
-            id=msg.value["id"],
-            n_views=msg.value["n_views"],
-            n_likes=msg.value["n_likes"],
-            n_comments=msg.value["n_comments"],
-            author=msg.value["author"],
-        )
+        # Extração dos dados brutos
+        event = {
+            "id": msg.value.get("id"),
+            "views": msg.value.get("views", 0),
+            "likes": msg.value.get("likes", 0),
+            "comments": msg.value.get("comments", 0),
+            "author": msg.value.get("author", "Unknown")
+        }
         
-        stats_aggr.add(event)
-        stats_viewmodel = StatsViewModel(
-            history=[stats_aggr.compute_stats()], author=event.author
-        )
-        stats_renderable = stats_widget.render(stats_viewmodel)
+        # Adiciona e verifica se é um post novo
+        is_new = stats_aggr.add(event)
+        
+        if not is_new:
+            continue # Pula a renderização se o post for repetido
+        # Busca o histórico APENAS do autor deste post
+        user_history = stats_aggr.get_history(event["author"])
 
+        stats_viewmodel = StatsViewModel(
+            history=user_history, 
+            author=event["author"],
+            n_window=config.STATS_WINDOW_LEN,
+            m_window=1
+        )
+
+        stats_renderable = stats_widget.render(stats_viewmodel)
         terminal_display.display(stats_renderable)
 
 
