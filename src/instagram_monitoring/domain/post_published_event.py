@@ -69,7 +69,6 @@ class InstagramAnalyticsApp:
                 n_comments=item.get("comment_count", 0),
                 author=item.get("user", {}).get("username", username)
             )
-            print(event)
             posts_events.append(event)
             
         return posts_events

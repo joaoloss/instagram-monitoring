@@ -6,7 +6,6 @@ from instagram_monitoring.consumer.services.rolling_stats_aggregator import (
     RollingStatsAggregator,
 )
 
-
 def main():
     print("Consumer is running...")
 
@@ -28,7 +27,6 @@ def consume_messages(consumer):
     stats_aggr = RollingStatsAggregator(window_len=config.STATS_WINDOW_LEN)
 
     for msg in consumer:
-        # Extração dos dados brutos
         event = {
             "id": msg.value.get("id"),
             "views": msg.value.get("views", 0),
@@ -37,12 +35,11 @@ def consume_messages(consumer):
             "author": msg.value.get("author", "Unknown")
         }
         
-        # Adiciona e verifica se é um post novo
         is_new = stats_aggr.add(event)
         
         if not is_new:
-            continue # Pula a renderização se o post for repetido
-        # Busca o histórico APENAS do autor deste post
+            continue
+        
         user_history = stats_aggr.get_history(event["author"])
 
         stats_viewmodel = StatsViewModel(
