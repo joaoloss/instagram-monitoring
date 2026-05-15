@@ -67,7 +67,7 @@ class InstagramAnalyticsApp:
                 n_views=item.get("play_count", 0), 
                 n_likes=item.get("like_count", 0),
                 n_comments=item.get("comment_count", 0),
-                author=item.get("user", {}).get("username", username)
+                author=username
             )
             posts_events.append(event)
             
