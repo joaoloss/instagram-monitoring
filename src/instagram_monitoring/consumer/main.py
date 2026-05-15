@@ -26,6 +26,7 @@ def main():
 
 def consume_messages(consumer):
     stats_aggr = RollingStatsAggregator(window_len=config.STATS_WINDOW_LEN)
+    posts_history = []
 
     for msg in consumer:
         event = PostPublishedEvent(
@@ -35,13 +36,12 @@ def consume_messages(consumer):
             n_comments=msg.value["n_comments"],
             author=msg.value["author"],
         )
-        
-        stats_aggr.add(event)
-        stats_viewmodel = StatsViewModel(
-            history=[stats_aggr.compute_stats()], author=event.author
-        )
-        stats_renderable = stats_widget.render(stats_viewmodel)
 
+        stats_aggr.add(event)
+        posts_history.append(stats_aggr.compute_stats())
+
+        stats_viewmodel = StatsViewModel(history=posts_history, author=event.author)
+        stats_renderable = stats_widget.render(stats_viewmodel)
         terminal_display.display(stats_renderable)
 
 
