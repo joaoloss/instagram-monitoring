@@ -1,6 +1,6 @@
 import json
 
-from kafka import KafkaConsumer
+from kafka import KafkaConsumer # type: ignore
 
 from instagram_monitoring import PostPublishedEvent
 
