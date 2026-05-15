@@ -61,7 +61,7 @@ def _check_alerts(vm: StatsViewModel) -> str:
     current = post_mais_recente['likes']
     
     upper_bound = mu + 1.5 * sigma
-    lower_bound = mu - 1.5 * sigma
+    lower_bound = max(0, mu - 1.5 * sigma)
 
     if current > upper_bound:
         return f"[bold green]🚀 VIRAL DETECTADO![/] ({current} likes > limiar {upper_bound:.0f})"
