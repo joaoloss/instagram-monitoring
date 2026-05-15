@@ -1,31 +1,34 @@
-import json
-
-from kafka import KafkaProducer
-
+import sys
+from instagram_monitoring.domain.post_published_event import InstagramAnalyticsApp
+from kafka import KafkaProducer # type: ignore
 from instagram_monitoring import PostPublishedEvent, config
 
 
 def main():
-    print("Producer is running...")
+    if len(sys.argv) < 3:
+        print("\n❌ Erro: Argumentos insuficientes.")
+        print("Uso: uv run seu_script.py <@usuario> <N_total> ")
+        print("Exemplo: uv run main.py neymarjr 20\n")
+        sys.exit(1)
 
-    bootstrap_servers = config.BOOTSTRAP_SERVERS
-    producer = KafkaProducer(
-        bootstrap_servers=bootstrap_servers,
-        value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-    )
+    username = sys.argv[1].replace("@", "")
+    try:
+        n_adj = int(sys.argv[2]) 
+    except ValueError:
+        print("Erro: N e M devem ser números inteiros.")
+        sys.exit(1)
 
-    for _ in range(10):
-        event = PostPublishedEvent(
-            id="1234567890",
-            n_views=100,
-            n_likes=50,
-            n_comments=10,
-            author="AuthorName",
-        )
-        producer.send(config.TOPIC, value=event.__dict__)
-        print(f"Sent event: {event}")
-    producer.flush()
+    app = InstagramAnalyticsApp()
+    
+    events = app.get_events(username, n=n_adj)
 
+    if not events:
+        print(f"⚠️ Nenhum post encontrado para @{username} ou erro na API.")
+        return
+
+    print(f"📤 Enviando {len(events)} eventos para o Kafka...")
+    for event in events:
+        app.produce_to_kafka(event)
 
 if __name__ == "__main__":
     main()
