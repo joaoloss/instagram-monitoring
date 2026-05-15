@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv # type: ignore
+
+load_dotenv()
 
 API_KEY = os.getenv("RAPIDAPI_KEY", "your_rapidapi_key_here")
 BOOTSTRAP_SERVERS = os.getenv(
