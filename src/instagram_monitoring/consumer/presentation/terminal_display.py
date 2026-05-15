@@ -1,6 +1,6 @@
-from rich import print as rprint
-from rich.console import RenderableType
-from rich.layout import Layout
+from rich import print as rprint # type: ignore
+from rich.console import RenderableType # type: ignore
+from rich.layout import Layout # type: ignore
 
 
 def display(stats_render: RenderableType) -> None:
