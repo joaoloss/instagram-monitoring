@@ -5,7 +5,7 @@ from instagram_monitoring import StatsSnapshot
 
 @dataclass
 class StatsViewModel:
-    stats: list[StatsSnapshot]
+    history: list[StatsSnapshot]
     author: str
     stat_style: str = ""
     border_style: str = "cyan"

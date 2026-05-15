@@ -14,7 +14,7 @@ def render(view_model: StatsViewModel) -> RenderableType:
 
     texts = []
     for label, metric in metrics:
-        mean, std, total = _compute_metrics(view_model.stats, metric)
+        mean, std, total = _compute_metrics(view_model.history, metric)
         text = _build_metric_text(
             label=label,
             mean=mean,
@@ -25,7 +25,7 @@ def render(view_model: StatsViewModel) -> RenderableType:
         texts.append(text)
 
     title = Text.assemble(
-        (f"Last {len(view_model.stats)} posts from "),
+        (f"Last {len(view_model.history)} posts from "),
         (view_model.author, "u"),
         style=view_model.title_style,
     )
@@ -68,12 +68,12 @@ def _build_metric_text(
 
 
 def _compute_metrics(
-    snapshots: list[StatsSnapshot],
+    history: list[StatsSnapshot],
     metric: str,
 ) -> tuple[float, float, int]:
-    means = np.array([getattr(stat, f"mean_{metric}") for stat in snapshots])
-    stds = np.array([getattr(stat, f"std_{metric}") for stat in snapshots])
-    totals = np.array([getattr(stat, f"total_{metric}") for stat in snapshots])
+    means = np.array([getattr(stat, f"mean_{metric}") for stat in history])
+    stds = np.array([getattr(stat, f"std_{metric}") for stat in history])
+    totals = np.array([getattr(stat, f"total_{metric}") for stat in history])
 
     mean = np.mean(means) if means.size > 0 else np.nan
     std = np.mean(stds) if stds.size > 0 else np.nan
