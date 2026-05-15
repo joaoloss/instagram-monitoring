@@ -7,3 +7,4 @@ class PostPublishedEvent:
     n_views: int
     n_likes: int
     n_comments: int
+    author: str

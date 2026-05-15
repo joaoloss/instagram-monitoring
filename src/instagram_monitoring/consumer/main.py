@@ -1,6 +1,10 @@
-from instagram_monitoring import PostPublishedEvent, StatsSnapshot, config
+from instagram_monitoring import PostPublishedEvent, config
 from instagram_monitoring.consumer.infra.post_consumer import PostConsumer
 from instagram_monitoring.consumer.presentation import stats_widget, terminal_display
+from instagram_monitoring.consumer.presentation.stats_view_model import StatsViewModel
+from instagram_monitoring.consumer.services.rolling_stats_aggregator import (
+    RollingStatsAggregator,
+)
 
 
 def main():
@@ -21,15 +25,23 @@ def main():
 
 
 def consume_messages(consumer):
-    for msg in consumer:
-        event = PostPublishedEvent(**msg.value)
-        stats = StatsSnapshot(
-            mean_views=event.n_views,
-            std_views=0.0,
-            total_views=event.n_views,
-        )
+    stats_aggr = RollingStatsAggregator(window_len=config.STATS_WINDOW_LEN)
 
-        stats_renderable = stats_widget.render([stats])
+    for msg in consumer:
+        event = PostPublishedEvent(
+            id=msg.value["id"],
+            n_views=msg.value["n_views"],
+            n_likes=msg.value["n_likes"],
+            n_comments=msg.value["n_comments"],
+            author=msg.value["author"],
+        )
+        
+        stats_aggr.add(event)
+        stats_viewmodel = StatsViewModel(
+            history=[stats_aggr.compute_stats()], author=event.author
+        )
+        stats_renderable = stats_widget.render(stats_viewmodel)
+
         terminal_display.display(stats_renderable)
 
 
