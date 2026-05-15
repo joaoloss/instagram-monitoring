@@ -1,37 +1,34 @@
-from collections import deque
-
-import numpy as np
-
-from instagram_monitoring import PostPublishedEvent, StatsSnapshot
-
-
 class RollingStatsAggregator:
-    def __init__(self, window_len: int) -> None:
-        self._posts: deque[PostPublishedEvent] = deque(maxlen=window_len)
+    def __init__(self, window_len: int):
+        self.window_len = window_len
+        # Dicionário onde a chave é o @usuario e o valor é a lista de posts
+        self.history_by_user = {} 
+        # Conjunto para rastrear IDs globais e evitar duplicatas
+        self.seen_ids = set()
 
-    def add(self, post: PostPublishedEvent):
-        self._posts.append(post)
+    def add(self, event: dict):
+        post_id = event.get("id")
+        author = event.get("author")
 
-    def compute_stats(self) -> StatsSnapshot:
-        views = np.array([post.n_views for post in self._posts])
-        likes = np.array([post.n_likes for post in self._posts])
-        comments = np.array([post.n_comments for post in self._posts])
+        # 1. Checagem de Unicidade
+        if post_id in self.seen_ids:
+            return False # Ignora o post se já foi processado
+        
+        self.seen_ids.add(post_id)
 
-        return StatsSnapshot(
-            mean_views=views.mean(),
-            std_views=views.std(),
-            total_views=views.sum(),
-            mean_likes=likes.mean(),
-            std_likes=likes.std(),
-            total_likes=likes.sum(),
-            mean_comments=comments.mean(),
-            std_comments=comments.std(),
-            total_comments=comments.sum(),
-        )
+        # 2. Separação por Usuário
+        if author not in self.history_by_user:
+            self.history_by_user[author] = []
 
-    def clear(self):
-        self._posts.clear()
+        user_posts = self.history_by_user[author]
+        user_posts.append(event)
 
-    @property
-    def posts(self) -> list[PostPublishedEvent]:
-        return list(self._posts)
+        # 3. Mantém a janela N apenas para esse usuário
+        if len(user_posts) > self.window_len:
+            removed = user_posts.pop(0)
+            self.seen_ids.remove(removed.get("id"))
+            
+        return True
+
+    def get_history(self, author: str):
+        return self.history_by_user.get(author, [])
